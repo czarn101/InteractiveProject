@@ -1,0 +1,216 @@
+import csv
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import random
+
+trainInputFile = open('/Users/Albert/Documents/Fall 2017/Interactive Data Analysis/Project 1/train.csv', "r")
+testInputFile = open('/Users/Albert/Documents/Fall 2017/Interactive Data Analysis/Project 1/test.csv', "r")
+
+trainTemp = []
+testTemp = []
+
+trainMissingVals = 0
+testMissingVals = 0
+
+#add each of the 'CSV' file to respective variables
+for line in trainInputFile:
+	trainTemp.append(line.replace("\n","").split(','))
+print("'Train Dataset' Loaded...")
+
+for line in testInputFile:
+	testTemp.append(line.replace("\n","").split(','))
+print("'Test Dataset' Loaded...")
+
+#checking if any element in train file is empty string
+for line in trainTemp:
+	for element in line:
+		if element == "":
+			trainMissingVals += 1
+print("'Train' has a total of: " + str(trainMissingVals) + " missing values.")
+
+#checking if any element in test file is empty string
+for line in testTemp:
+	for element in line:
+		if element == "":
+			testMissingVals += 1
+print("'Test' has a total of: " + str(testMissingVals) + " missing values.")
+
+#convert trainTemp and testTemp to Numpy Arrays
+train = np.array(trainTemp)
+test = np.array(testTemp)
+
+#its '-1' because it includes 'User_ID'
+print("Number of unique values of First Col Train and Test: " + str(len(list((set(train[:,0])).intersection(set(test[:,0])))) - 1))
+
+
+#get csv from pandas because it creates a dataframe which is nice to access
+trainPandas = pd.read_csv('/Users/Albert/Documents/Fall 2017/Interactive Data Analysis/Project 1/train.csv')
+testPandas = pd.read_csv('/Users/Albert/Documents/Fall 2017/Interactive Data Analysis/Project 1/test.csv')
+
+testPandas.fillna(0, inplace=True)
+
+#convert User_ID col of Train and Test to category variables
+trainPandas['User_ID'] = trainPandas['User_ID'].astype('category')
+testPandas['User_ID'] = testPandas['User_ID'].astype('category')
+
+#how many different product lines are there in the training dataset?
+UniqueProductsTrain = len(trainPandas['Product_ID'].unique())
+print("Amount of different products in 'Train':" + str(UniqueProductsTrain))
+
+#print(trainPandas['Product_ID'].describe())
+print("---Summary of Product_ID---")
+print(trainPandas['Product_ID'].value_counts().describe())
+
+
+
+###PLOT 1###
+#plot distribution of gender with bar graph
+trainPandas['Gender'].value_counts().plot(kind='bar',color=['g','b'])
+plt.title("Distribution of Gender - Training Dataset")
+
+###PLOT 2###
+#plot Age and Gender from Train with bar graph
+PlotAgeGenderTrain = pd.crosstab(index=trainPandas['Age'], columns=trainPandas['Gender'])
+PlotAgeGenderTrain.plot(kind="bar",color=['r','b'])
+plt.title("Distribution of Age Filled by Gender - Training Dataset")
+
+
+#convert Occupation col of Train and Test to category variables
+trainPandas['Occupation'] = trainPandas['Occupation'].astype('category')
+testPandas['Occupation'] = testPandas['Occupation'].astype('category')
+
+#how many different types of Occupations are there?
+UniqueOccupationTrain = len(trainPandas['Occupation'].unique())
+print("Amount of different occupations in 'Train': " + str(UniqueOccupationTrain))
+
+###PLOT 3###
+#graph occupation and age and see if they have any correlations
+OccupationAgeTrain = pd.crosstab(index=trainPandas['Occupation'], columns=trainPandas['Age'])
+OccupationAgeTrain.plot(kind='bar')
+
+###PLOT 4###
+#graph occupation and gender and see if they have correlations
+OccupationGenderTrain = pd.crosstab(index=trainPandas['Occupation'], columns=trainPandas['Gender'])
+OccupationGenderTrain.plot(kind='bar')
+
+###PLOT 5###
+GenderOccupationAge = pd.crosstab(index=[trainPandas['Gender'],trainPandas['Occupation']], columns=trainPandas['Age'])
+GenderOccupationAge.plot(kind='bar')
+
+#See what types of different city ategories there are
+UniqueCitiesCategory = trainPandas['City_Category'].unique()
+print("Types of different city categories in 'Train': " + str(UniqueCitiesCategory))
+
+###PLOT 6###
+CityAgeTrain = pd.crosstab(index=trainPandas['Age'], columns=trainPandas['City_Category'])
+#CityAgeTrain.plot(kind='box')
+CityAgeTrain.plot(kind='bar')
+
+###PLOT 7###
+SICAgeCityCategory = pd.crosstab(index=[trainPandas['Stay_In_Current_City_Years'],trainPandas['City_Category']], columns=trainPandas['Age'])
+SICAgeCityCategory.plot(kind='bar')
+
+#convert marital col of Train and Test to category variables
+trainPandas['Marital_Status'] = trainPandas['Marital_Status'].astype('category')
+testPandas['Marital_Status'] = testPandas['Marital_Status'].astype('category')
+
+
+###PLOT 8###
+#looking at ages 0-17 none of the people in that group have a status of 1 so 0 is unmarried and married is 1
+MaritalAgeGender = pd.crosstab(index=[trainPandas['Marital_Status'],trainPandas['Gender']], columns=trainPandas['Age'])
+MaritalAgeGender.plot(kind='bar')
+
+#trainPandas.to_csv('Printing_B.csv')
+
+#set product categories as factors/categories
+trainPandas['Product_Category_1'] = trainPandas['Product_Category_1'].astype('category')
+testPandas['Product_Category_1'] = testPandas['Product_Category_1'].astype('category')
+trainPandas['Product_Category_2'] = trainPandas['Product_Category_2'].astype('category')
+testPandas['Product_Category_2'] = testPandas['Product_Category_2'].astype('category')
+trainPandas['Product_Category_3'] = trainPandas['Product_Category_3'].astype('category')
+testPandas['Product_Category_3'] = testPandas['Product_Category_3'].astype('category')
+
+trainPandas['Stay_In_Current_City_Years'] = trainPandas['Stay_In_Current_City_Years'].astype('category')
+testPandas['Stay_In_Current_City_Years'] = testPandas['Stay_In_Current_City_Years'].astype('category')
+
+
+plt.show()
+
+
+
+#testPandas['Comb'] = testPandas['Comb'].astype('character')
+
+#########################
+
+
+#Model Implementation
+
+#Train on - Gender, Age, Occupation, City Category, Stay in current city, Marital status, Product category 1
+from sklearn import linear_model
+from sklearn import preprocessing
+
+#
+#trainPandas.join(dummies)
+
+
+#trainDataTemp1 = trainPandas[['Gender', 'Age', 'Occupation', 'City_Category', 'Stay_In_Current_City_Years', 'Marital_Status', 'Product_Category_1']].copy()
+trainDataTemp1 = trainPandas[['Occupation', 'Marital_Status', 'Product_Category_1']].copy()
+
+random.seed(1968)
+dummies = pd.get_dummies(trainPandas['City_Category'])
+dummies1 = pd.get_dummies(trainPandas['Stay_In_Current_City_Years'])
+dummies2 = pd.get_dummies(trainPandas['Age'])
+dummies3 = pd.get_dummies(trainPandas['Gender'])
+
+tdata = pd.concat([trainDataTemp1,dummies],axis=1)
+tdata = pd.concat([tdata,dummies1],axis=1)
+tdata = pd.concat([tdata,dummies2],axis=1)
+tdata = pd.concat([tdata,dummies3],axis=1)
+#print(tdata)
+#tdata['City_Category'] = tdata['City_Category'].astype('category')
+#print(tdata)
+
+
+target1 = trainPandas[['Purchase']].copy()
+
+lm = linear_model.LinearRegression()
+
+
+model = lm.fit(tdata,target1)
+
+pred = lm.predict(tdata)
+
+score = lm.score(tdata,target1) # the r^2 of the value
+
+print("Score of Model: " + str(score))
+
+"""
+trainDataTemp2 = trainPandas[['Occupation', 'Marital_Status', 'Product_Category_1','Product_Category_2']].copy()
+#trainDataTemp2 = trainDataTemp2['Product_Category_2'].cat.add_categories("0").fillna("0")
+random.seed(1968)
+
+trainData2 = pd.concat([trainDataTemp2,dummies],axis=1)
+trainData2 = pd.concat([trainData2,dummies1],axis=1)
+trainData2 = pd.concat([trainData2,dummies2],axis=1)
+trainData2 = pd.concat([trainData2,dummies3],axis=1)
+#print(trainData2)
+target2 = target1
+
+lm2 = linear_model.LinearRegression()
+model2 = lm2.fit(trainDataTemp2,target2)
+pred2 = lm2.predict(trainDataTemp2)
+score2 = lm2.score(trainDataTemp2,target2)
+print(score2)
+"""
+"""
+ofile = open("testPrinting.txt",'w')
+for line in train:
+	ofile.write(str(line) + "\n")
+ofile.close()
+"""
+
+
+
+
